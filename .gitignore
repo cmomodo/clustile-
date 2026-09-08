@@ -1,0 +1,16 @@
+.DS_Store
+
+# Terraform working directories and local state
+**/.terraform/*
+*.tfstate
+*.tfstate.*
+crash.log
+crash.*.log
+
+# Local Terraform variable and override files
+*.tfvars
+*.tfvars.json
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
