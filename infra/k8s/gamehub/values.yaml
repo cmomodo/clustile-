@@ -6,13 +6,18 @@ image:
   pullPolicy: IfNotPresent
 
 service:
-  type: LoadBalancer
+  type: ClusterIP
   port: 80
-  targetPort: 80
-  annotations:
-    service.beta.kubernetes.io/aws-load-balancer-type: external
-    service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: ip
-    service.beta.kubernetes.io/aws-load-balancer-scheme: internet-facing
+  targetPort: 3000
+  annotations: {}
+
+ingress:
+  enabled: true
+  className: traefik
+  # Leave host empty to serve the app through Traefik's NLB hostname.
+  host: ""
+  path: /
+  pathType: Prefix
 
 resources:
   limits:
