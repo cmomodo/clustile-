@@ -9,11 +9,7 @@ resource "aws_eks_cluster" "gamehub" {
   version  = "1.35"
 
   vpc_config {
-    subnet_ids = [
-      aws_subnet.az1.id,
-      aws_subnet.az2.id,
-      aws_subnet.az3.id,
-    ]
+    subnet_ids = [for subnet in aws_subnet.private : subnet.id]
 
     # Keep the control plane reachable from the VPC and from approved admins.
     endpoint_private_access = true
@@ -31,11 +27,7 @@ resource "aws_eks_node_group" "gamehub" {
   cluster_name    = aws_eks_cluster.gamehub.name
   node_group_name = "gamehub-nodes"
   node_role_arn   = aws_iam_role.node.arn
-  subnet_ids = [
-    aws_subnet.az1.id,
-    aws_subnet.az2.id,
-    aws_subnet.az3.id,
-  ]
+  subnet_ids      = [for subnet in aws_subnet.private : subnet.id]
 
   scaling_config {
     desired_size = 3
@@ -48,6 +40,33 @@ resource "aws_eks_node_group" "gamehub" {
     aws_iam_role_policy_attachment.node_AmazonEKSWorkerNodePolicy,
     aws_iam_role_policy_attachment.node_AmazonEKS_CNI_Policy,
   ]
+}
+
+resource "aws_eks_addon" "vpc_cni" {
+  cluster_name             = aws_eks_cluster.gamehub.name
+  addon_name               = "vpc-cni"
+  resolve_conflicts_on_create = "OVERWRITE"
+  resolve_conflicts_on_update = "OVERWRITE"
+
+  depends_on = [aws_eks_node_group.gamehub]
+}
+
+resource "aws_eks_addon" "coredns" {
+  cluster_name             = aws_eks_cluster.gamehub.name
+  addon_name               = "coredns"
+  resolve_conflicts_on_create = "OVERWRITE"
+  resolve_conflicts_on_update = "OVERWRITE"
+
+  depends_on = [aws_eks_node_group.gamehub]
+}
+
+resource "aws_eks_addon" "kube_proxy" {
+  cluster_name             = aws_eks_cluster.gamehub.name
+  addon_name               = "kube-proxy"
+  resolve_conflicts_on_create = "OVERWRITE"
+  resolve_conflicts_on_update = "OVERWRITE"
+
+  depends_on = [aws_eks_node_group.gamehub]
 }
 
 resource "aws_iam_role" "cluster" {
@@ -102,4 +121,21 @@ resource "aws_iam_role_policy_attachment" "node_AmazonEKS_CNI_Policy" {
 resource "aws_iam_role_policy_attachment" "node_AmazonEC2ContainerRegistryReadOnly" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
   role       = aws_iam_role.node.name
+}
+
+data "aws_caller_identity" "current" {}
+
+resource "aws_eks_access_entry" "admin" {
+  cluster_name      = aws_eks_cluster.gamehub.name
+  principal_arn     = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:user/cmomodo"
+  kubernetes_groups = []
+}
+
+resource "aws_eks_access_policy_association" "admin" {
+  cluster_name       = aws_eks_cluster.gamehub.name
+  policy_arn         = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
+  principal_arn      = aws_eks_access_entry.admin.principal_arn
+  access_scope {
+    type = "cluster"
+  }
 }
