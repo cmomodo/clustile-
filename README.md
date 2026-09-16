@@ -1,5 +1,16 @@
 # The Game Hub
-This will be an application that will move my gaming app to a kubernetes cluster due to high demand.
+The game that came about due to high demand. I had many people asking for the game to be deployed. since its open source I wanted it to be cloud agnostic. so I decided to use kubernetes. I also see it as an oppurtunity to learn kubernetes and cloud native technologies. e will have a cicd pipeline to automate the deployment process. This includes building the docker image, pushing it to a registry, and deploying it to the kubernetes cluster. our preferred cloud  provider is AWS.
+
 
 ## System Design
-This is a 2048 game. it will be used to show how i used kubernetes to make it scalable for many players. due to high demand, we will be using argocd to update the game configuration. We will have a cicd pipeline to automate the deployment process. This includes building the docker image, pushing it to a registry, and deploying it to the kubernetes cluster. our preferred cloud  provider is AWS.
+
+The main components are:
+
+- Terraform for infrastructure provisioning
+- Argo CD for GitOps deployments
+- Git for version control
+- Pre-commit hooks to run linters and tests before commits
+- TFLint to lint Terraform code
+- CI/CD pipelines to build, publish, and deploy the application
+
+![Game Hub system design](Images/Gamehub.png)

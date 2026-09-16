@@ -1,8 +1,8 @@
 replicaCount: 2
 
 image:
-  repository: "{{ ECR_REGISTRY }}/gamehub"
-  tag: "latest"
+  repository: "449095351082.dkr.ecr.us-east-1.amazonaws.com/gamehub"
+  tag: "v1.0.0-fac86b3"
   pullPolicy: IfNotPresent
 
 service:

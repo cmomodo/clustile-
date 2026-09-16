@@ -127,7 +127,7 @@ data "aws_caller_identity" "current" {}
 
 resource "aws_eks_access_entry" "admin" {
   cluster_name      = aws_eks_cluster.gamehub.name
-  principal_arn     = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:user/cmomodo"
+  principal_arn     = var.eks_admin_principal_arn
   kubernetes_groups = []
 }
 

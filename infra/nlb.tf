@@ -29,18 +29,23 @@ resource "aws_security_group" "lb_sg" {
   }
 }
 
-# S3 bucket for NLB access logs
-resource "aws_s3_bucket" "lb_logs" {
-  bucket = "gamehub-nlb-logs-${data.aws_caller_identity.current.account_id}"
+# Retain the existing log bucket when tearing down this infrastructure.
+removed {
+  from = aws_s3_bucket.lb_logs
 
-  tags = {
-    Name = "gamehub-nlb-logs"
+  lifecycle {
+    destroy = false
   }
+}
+
+# The persistent bucket is used here but is no longer managed by this state.
+data "aws_s3_bucket" "lb_logs" {
+  bucket = "gamehub-nlb-logs-${data.aws_caller_identity.current.account_id}"
 }
 
 # S3 bucket policy to allow NLB to write logs
 resource "aws_s3_bucket_policy" "lb_logs" {
-  bucket = aws_s3_bucket.lb_logs.id
+  bucket = data.aws_s3_bucket.lb_logs.id
 
   policy = jsonencode({
     Version = "2012-10-17"
@@ -53,7 +58,7 @@ resource "aws_s3_bucket_policy" "lb_logs" {
           Service = "delivery.logs.amazonaws.com"
         }
         Action   = "s3:GetBucketAcl"
-        Resource = aws_s3_bucket.lb_logs.arn
+        Resource = data.aws_s3_bucket.lb_logs.arn
         Condition = {
           StringEquals = {
             "aws:SourceAccount" = data.aws_caller_identity.current.account_id
@@ -70,7 +75,7 @@ resource "aws_s3_bucket_policy" "lb_logs" {
           Service = "delivery.logs.amazonaws.com"
         }
         Action   = "s3:PutObject"
-        Resource = "${aws_s3_bucket.lb_logs.arn}/nlb-logs/AWSLogs/${data.aws_caller_identity.current.account_id}/*"
+        Resource = "${data.aws_s3_bucket.lb_logs.arn}/nlb-logs/AWSLogs/${data.aws_caller_identity.current.account_id}/*"
         Condition = {
           StringEquals = {
             "s3:x-amz-acl"      = "bucket-owner-full-control"
@@ -97,7 +102,7 @@ resource "aws_lb" "gamehub" {
   depends_on = [aws_s3_bucket_policy.lb_logs]
 
   access_logs {
-    bucket  = aws_s3_bucket.lb_logs.id
+    bucket  = data.aws_s3_bucket.lb_logs.id
     prefix  = "nlb-logs"
     enabled = true
   }
