@@ -1,5 +1,9 @@
 .DS_Store
 
+# Local environment configuration
+.env
+!.env.example
+
 # Terraform working directories and local state
 **/.terraform/*
 *.tfstate

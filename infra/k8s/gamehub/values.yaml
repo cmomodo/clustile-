@@ -1,0 +1,34 @@
+replicaCount: 2
+
+image:
+  repository: "449095351082.dkr.ecr.us-east-1.amazonaws.com/gamehub"
+  tag: "v1.0.0-fac86b3"
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 3000
+  annotations: {}
+
+ingress:
+  enabled: true
+  className: traefik
+  # Leave host empty to serve the app through Traefik's NLB hostname.
+  host: ""
+  path: /
+  pathType: Prefix
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 256Mi
+  requests:
+    cpu: 250m
+    memory: 128Mi
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
