@@ -1,0 +1,6 @@
+serviceAccount:
+  # Applied separately by infra/install-helm.sh and annotated with its IAM role.
+  create: false
+  name: aws-load-balancer-controller
+
+# clusterName, region, and vpcId are supplied by the installation script.

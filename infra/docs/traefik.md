@@ -6,19 +6,24 @@ this repository.
 ```text
 k8s/
 ├── addons/
+│   ├── aws-load-balancer-controller/
+│   │   ├── serviceaccount.yaml
+│   │   └── values.yaml
 │   └── traefik/
 │       └── values.yaml
-└── charts/
-    └── gamehub/              # Add when the application chart is created
-        ├── Chart.yaml
-        ├── values.yaml
-        └── templates/
-            ├── deployment.yaml
-            ├── service.yaml
-            └── ingress.yaml
+└── gamehub/
+    ├── Chart.yaml
+    ├── values.yaml
+    └── templates/
+        ├── deployment.yaml
+        ├── service.yaml
+        └── ingress.yaml
 ```
 
 ## Traefik
+
+See [AWS Load Balancer Controller](aws-load-balancer-controller.md) for the
+controller add-on's ServiceAccount, Helm values, and IAM prerequisites.
 
 Traefik is a third-party Helm chart. Its upstream chart already contains its
 Deployment, Service, RBAC, CRDs, and other templates. This repository therefore
@@ -83,6 +88,6 @@ the S3 bucket will not receive useful NLB access-log records.
 
 ## Game Hub chart
 
-The `charts/` directory is for Helm charts that this repository owns. When the
-Game Hub chart is created, its `templates/` directory should contain the Game
-Hub Deployment, Service, and Ingress. It should not contain Traefik's resources.
+The `gamehub/` directory contains the application Helm chart owned by this
+repository. Its `templates/` directory contains the GameHub Deployment, Service,
+and Ingress. Cluster add-ons belong in `addons/`.

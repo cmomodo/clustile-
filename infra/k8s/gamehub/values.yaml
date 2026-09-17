@@ -19,6 +19,7 @@ ingress:
   path: /
   pathType: Prefix
 
+
 resources:
   limits:
     cpu: 500m

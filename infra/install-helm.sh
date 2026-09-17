@@ -123,13 +123,18 @@ aws iam put-role-policy \
 echo ""
 echo "🔧 Installing AWS Load Balancer Controller..."
 ROLE_ARN="arn:aws:iam::${ACCOUNT_ID}:role/${ROLE_NAME}"
+VPC_ID=$(aws eks describe-cluster --name "$CLUSTER_NAME" --region "$REGION" --query 'cluster.resourcesVpcConfig.vpcId' --output text)
+
+kubectl apply -f "$SCRIPT_DIR/k8s/addons/aws-load-balancer-controller/serviceaccount.yaml"
+kubectl annotate serviceaccount aws-load-balancer-controller -n kube-system \
+  "eks.amazonaws.com/role-arn=$ROLE_ARN" --overwrite
 
 helm install aws-load-balancer-controller eks/aws-load-balancer-controller \
   -n kube-system \
+  -f "$SCRIPT_DIR/k8s/addons/aws-load-balancer-controller/values.yaml" \
   --set clusterName="$CLUSTER_NAME" \
-  --set serviceAccount.annotations."eks\.amazonaws\.com/role-arn"="$ROLE_ARN" \
-  --set serviceAccount.create=true \
-  --set awsRegion="$REGION" \
+  --set region="$REGION" \
+  --set vpcId="$VPC_ID" \
   --wait --timeout=5m
 
 echo "✅ AWS Load Balancer Controller installed"
