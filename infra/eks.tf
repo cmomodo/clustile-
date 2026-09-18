@@ -22,6 +22,7 @@ resource "aws_eks_cluster" "gamehub" {
   depends_on = [
     aws_iam_role_policy_attachment.cluster_AmazonEKSClusterPolicy,
   ]
+  tags = local.common_tags
 }
 resource "aws_eks_node_group" "gamehub" {
   cluster_name    = aws_eks_cluster.gamehub.name
@@ -40,33 +41,37 @@ resource "aws_eks_node_group" "gamehub" {
     aws_iam_role_policy_attachment.node_AmazonEKSWorkerNodePolicy,
     aws_iam_role_policy_attachment.node_AmazonEKS_CNI_Policy,
   ]
+  tags = local.common_tags
 }
 
 resource "aws_eks_addon" "vpc_cni" {
-  cluster_name             = aws_eks_cluster.gamehub.name
-  addon_name               = "vpc-cni"
+  cluster_name                = aws_eks_cluster.gamehub.name
+  addon_name                  = "vpc-cni"
   resolve_conflicts_on_create = "OVERWRITE"
   resolve_conflicts_on_update = "OVERWRITE"
 
   depends_on = [aws_eks_node_group.gamehub]
+  tags       = local.common_tags
 }
 
 resource "aws_eks_addon" "coredns" {
-  cluster_name             = aws_eks_cluster.gamehub.name
-  addon_name               = "coredns"
+  cluster_name                = aws_eks_cluster.gamehub.name
+  addon_name                  = "coredns"
   resolve_conflicts_on_create = "OVERWRITE"
   resolve_conflicts_on_update = "OVERWRITE"
 
   depends_on = [aws_eks_node_group.gamehub]
+  tags       = local.common_tags
 }
 
 resource "aws_eks_addon" "kube_proxy" {
-  cluster_name             = aws_eks_cluster.gamehub.name
-  addon_name               = "kube-proxy"
+  cluster_name                = aws_eks_cluster.gamehub.name
+  addon_name                  = "kube-proxy"
   resolve_conflicts_on_create = "OVERWRITE"
   resolve_conflicts_on_update = "OVERWRITE"
 
   depends_on = [aws_eks_node_group.gamehub]
+  tags       = local.common_tags
 }
 
 resource "aws_iam_role" "cluster" {
@@ -86,6 +91,7 @@ resource "aws_iam_role" "cluster" {
       },
     ]
   })
+  tags = local.common_tags
 }
 
 resource "aws_iam_role_policy_attachment" "cluster_AmazonEKSClusterPolicy" {
@@ -106,6 +112,7 @@ resource "aws_iam_role" "node" {
       }
     }]
   })
+  tags = local.common_tags
 }
 
 resource "aws_iam_role_policy_attachment" "node_AmazonEKSWorkerNodePolicy" {
@@ -129,12 +136,13 @@ resource "aws_eks_access_entry" "admin" {
   cluster_name      = aws_eks_cluster.gamehub.name
   principal_arn     = var.eks_admin_principal_arn
   kubernetes_groups = []
+  tags              = local.common_tags
 }
 
 resource "aws_eks_access_policy_association" "admin" {
-  cluster_name       = aws_eks_cluster.gamehub.name
-  policy_arn         = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
-  principal_arn      = aws_eks_access_entry.admin.principal_arn
+  cluster_name  = aws_eks_cluster.gamehub.name
+  policy_arn    = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
+  principal_arn = aws_eks_access_entry.admin.principal_arn
   access_scope {
     type = "cluster"
   }

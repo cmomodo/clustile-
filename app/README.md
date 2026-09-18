@@ -3,7 +3,7 @@
 _Ensure nodejs is installed first_
 
 ```
-node -v 
+node -v
 npm -v
 ```
 ```

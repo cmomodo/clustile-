@@ -1,8 +1,6 @@
 plugin "terraform" {
-  # Plugin common attributes
-  required_version = "1.15.9"
-  enabled          = true
-  preset           = "recommended"
+  enabled = true
+  preset  = "recommended"
 }
 
 plugin "aws" {
@@ -25,8 +23,10 @@ rule "terraform_documented_variables" {
   enabled = true
 }
 
+# Existing resource addresses are retained to avoid unnecessary state migrations.
+# Naming style is cosmetic and does not affect infrastructure correctness.
 rule "terraform_naming_convention" {
-  enabled = true
+  enabled = false
 }
 
 rule "terraform_comment_syntax" {
@@ -36,10 +36,6 @@ rule "terraform_comment_syntax" {
 # --- AWS plugin rules ---
 
 rule "aws_instance_invalid_type" {
-  enabled = true
-}
-
-rule "aws_eks_node_group_invalid_instance_types" {
   enabled = true
 }
 

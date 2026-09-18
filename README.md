@@ -9,7 +9,7 @@ The main components are:
 - Terraform for infrastructure provisioning
 - Argo CD for GitOps deployments
 - Git for version control
-- Pre-commit hooks to run linters and tests before commits
+- Pre-commit hooks to check YAML, formatting, and Terraform before commits
 - TFLint to lint Terraform code
 - CI/CD pipelines to build, publish, and deploy the application
 

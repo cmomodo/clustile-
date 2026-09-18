@@ -4,6 +4,7 @@ resource "aws_vpc" "gamehub" {
   cidr_block           = "10.0.0.0/16"
   enable_dns_support   = true
   enable_dns_hostnames = true
+  tags                 = local.common_tags
 }
 
 resource "aws_subnet" "public" {
@@ -19,10 +20,10 @@ resource "aws_subnet" "public" {
   map_public_ip_on_launch = true
 
 
-  tags = {
+  tags = merge(local.common_tags, {
     Name                     = "gamehub-public-${each.key}"
     "kubernetes.io/role/elb" = "1"
-  }
+  })
 }
 
 resource "aws_subnet" "private" {
@@ -36,28 +37,28 @@ resource "aws_subnet" "private" {
   availability_zone = each.value.az
   cidr_block        = each.value.cidr
 
-  tags = {
+  tags = merge(local.common_tags, {
     Name                              = "gamehub-private-${each.key}"
     "kubernetes.io/role/internal-elb" = "1"
-  }
+  })
 }
 
 # Internet Gateway for public subnets
 resource "aws_internet_gateway" "gamehub" {
   vpc_id = aws_vpc.gamehub.id
 
-  tags = {
+  tags = merge(local.common_tags, {
     Name = "gamehub-igw"
-  }
+  })
 }
 
 # Elastic IP for NAT Gateway
 resource "aws_eip" "nat" {
   domain = "vpc"
 
-  tags = {
+  tags = merge(local.common_tags, {
     Name = "gamehub-eip"
-  }
+  })
 
   depends_on = [aws_internet_gateway.gamehub]
 }
@@ -67,9 +68,9 @@ resource "aws_nat_gateway" "gamehub" {
   allocation_id = aws_eip.nat.id
   subnet_id     = aws_subnet.public["a"].id
 
-  tags = {
+  tags = merge(local.common_tags, {
     Name = "gamehub-nat"
-  }
+  })
 
   depends_on = [aws_internet_gateway.gamehub]
 }
@@ -79,13 +80,13 @@ resource "aws_route_table" "public" {
   vpc_id = aws_vpc.gamehub.id
 
   route {
-    cidr_block      = "0.0.0.0/0"
-    gateway_id      = aws_internet_gateway.gamehub.id
+    cidr_block = "0.0.0.0/0"
+    gateway_id = aws_internet_gateway.gamehub.id
   }
 
-  tags = {
+  tags = merge(local.common_tags, {
     Name = "gamehub-public-rt"
-  }
+  })
 }
 
 # Associate public subnets with public route table
@@ -104,9 +105,9 @@ resource "aws_route_table" "private" {
     nat_gateway_id = aws_nat_gateway.gamehub.id
   }
 
-  tags = {
+  tags = merge(local.common_tags, {
     Name = "gamehub-private-rt"
-  }
+  })
 }
 
 # Associate private subnets with private route table
@@ -153,7 +154,7 @@ resource "aws_security_group" "node" {
     description = "Allow all outbound traffic"
   }
 
-  tags = {
+  tags = merge(local.common_tags, {
     Name = "gamehub-node-sg"
-  }
+  })
 }

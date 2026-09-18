@@ -12,7 +12,13 @@ ECR_REPOSITORY ?= gamehub
 APP_DIR ?= app
 IMAGE_TAG ?= latest
 
-.PHONY: init plan apply destroy bootstrap bootstrap-init bootstrap-plan bootstrap-apply bootstrap-destroy push
+.PHONY: init plan apply destroy bootstrap bootstrap-init bootstrap-plan bootstrap-apply bootstrap-destroy push hooks lint
+
+hooks:
+	pre-commit install --install-hooks
+
+lint:
+	pre-commit run --all-files
 
 init:
 	$(TERRAFORM) -chdir=$(TF_DIR) init

@@ -5,4 +5,5 @@ resource "aws_ecr_repository" "gamehub" {
   image_scanning_configuration {
     scan_on_push = true
   }
+  tags = local.common_tags
 }

@@ -24,9 +24,9 @@ resource "aws_security_group" "lb_sg" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  tags = {
+  tags = merge(local.common_tags, {
     Name = "gamehub-nlb-sg"
-  }
+  })
 }
 
 # Retain the existing log bucket when tearing down this infrastructure.
@@ -107,9 +107,9 @@ resource "aws_lb" "gamehub" {
     enabled = true
   }
 
-  tags = {
+  tags = merge(local.common_tags, {
     Environment = "production"
-  }
+  })
 }
 
 # Target group for the NLB
@@ -128,9 +128,9 @@ resource "aws_lb_target_group" "gamehub" {
     port                = "80"
   }
 
-  tags = {
+  tags = merge(local.common_tags, {
     Name = "gamehub-tg"
-  }
+  })
 }
 
 # Listener for the NLB
@@ -143,6 +143,7 @@ resource "aws_lb_listener" "gamehub" {
     type             = "forward"
     target_group_arn = aws_lb_target_group.gamehub.arn
   }
+  tags = local.common_tags
 }
 
 data "aws_partition" "current" {}
