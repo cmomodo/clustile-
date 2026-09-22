@@ -24,6 +24,7 @@ resource "aws_eks_cluster" "gamehub" {
   ]
   tags = local.common_tags
 }
+
 resource "aws_eks_node_group" "gamehub" {
   cluster_name    = aws_eks_cluster.gamehub.name
   node_group_name = "gamehub-nodes"
@@ -146,4 +147,30 @@ resource "aws_eks_access_policy_association" "admin" {
   access_scope {
     type = "cluster"
   }
+}
+
+# Outputs
+output "cluster_name" {
+  description = "EKS cluster name"
+  value       = aws_eks_cluster.gamehub.name
+}
+
+output "cluster_endpoint" {
+  description = "EKS cluster endpoint"
+  value       = aws_eks_cluster.gamehub.endpoint
+}
+
+output "cluster_oidc_issuer_url" {
+  description = "OIDC issuer URL for the cluster"
+  value       = aws_eks_cluster.gamehub.identity[0].oidc[0].issuer
+}
+
+output "aws_load_balancer_controller_role_arn" {
+  description = "ARN of IAM role for AWS Load Balancer Controller"
+  value       = aws_iam_role.aws_load_balancer_controller.arn
+}
+
+output "aws_load_balancer_controller_chart_version" {
+  description = "AWS Load Balancer Controller Helm chart version"
+  value       = var.aws_load_balancer_controller_chart_version
 }

@@ -7,3 +7,9 @@ variable "eks_admin_principal_arn" {
     error_message = "Provide an IAM user or role ARN, not an STS session ARN or account root ARN."
   }
 }
+
+variable "aws_load_balancer_controller_chart_version" {
+  description = "Version of the AWS Load Balancer Controller Helm chart"
+  type        = string
+  default     = "1.9.1"
+}

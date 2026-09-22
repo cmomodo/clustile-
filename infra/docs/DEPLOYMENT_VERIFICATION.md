@@ -2,6 +2,57 @@
 
 After deploying your gamehub app, use these commands to verify it's running.
 
+## Deploy the app and port-forward
+
+Run these commands from the project root (`kube_game`). Creating EKS and running
+`infra/install-helm.sh` installs the infrastructure controllers, but does not
+install the GameHub application chart.
+
+If `kubectl get svc -A` only shows `kubernetes` in the `default` namespace and
+controller services in `kube-system`, the GameHub service is missing. The
+`kubernetes` service is the Kubernetes API, not the app.
+
+```bash
+# Connect to the current cluster (refresh this after recreating EKS).
+aws eks update-kubeconfig --region us-east-1 --name gamehub38
+kubectl get nodes
+
+# Check whether the app exists in another namespace before installing it.
+kubectl get svc -A
+helm list -A
+
+# Install or update the app in default.
+helm upgrade --install gamehub ./infra/k8s/gamehub --namespace default
+kubectl rollout status deployment/gamehub --namespace default --timeout=180s
+kubectl get pods,svc --namespace default -l app=gamehub
+
+# Keep this command running while using the app.
+kubectl port-forward --namespace default svc/gamehub 3000:80
+```
+
+Open http://localhost:3000. Here `3000` is the local port and `80` is the service
+port; the service forwards traffic to port `3000` in the app container. Stop
+forwarding with Ctrl+C. If local port 3000 is occupied, use `8080:80` and open
+http://localhost:8080 instead.
+
+If the app already exists in another namespace, use that namespace in the
+rollout and port-forward commands instead of installing another copy.
+
+Port-forwarding needs a running app pod, but does not require an Ingress or an
+external load balancer. Traefik's external IP can remain `<pending>` while you
+test the app locally.
+
+If rollout fails, inspect the pods and events:
+
+```bash
+kubectl get pods --namespace default -l app=gamehub
+kubectl describe pods --namespace default -l app=gamehub
+kubectl logs --namespace default -l app=gamehub --all-containers=true
+```
+
+For `ImagePullBackOff`, check that the ECR repository and image tag in
+`infra/k8s/gamehub/values.yaml` exist and that the nodes can pull the image.
+
 ## Quick Checks
 
 ### 1. **Run the automatic verification script** (recommended)
