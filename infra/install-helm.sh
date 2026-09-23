@@ -22,6 +22,10 @@ echo "   Role ARN: $ROLE_ARN"
 echo "   Chart Version: $CONTROLLER_VERSION"
 echo ""
 
+# Refresh the endpoint when an EKS cluster has been recreated with the same name.
+echo "🔗 Updating kubeconfig for $CLUSTER_NAME..."
+aws eks update-kubeconfig --region "$REGION" --name "$CLUSTER_NAME"
+
 # 1. Add Helm repositories
 echo "📦 Adding Helm repositories..."
 helm repo add eks https://aws.github.io/eks-charts
@@ -39,7 +43,7 @@ kubectl annotate serviceaccount aws-load-balancer-controller -n kube-system \
   "eks.amazonaws.com/role-arn=$ROLE_ARN" --overwrite
 
 # Install with pinned version from Terraform
-helm install aws-load-balancer-controller eks/aws-load-balancer-controller \
+helm upgrade --install aws-load-balancer-controller eks/aws-load-balancer-controller \
   --version "$CONTROLLER_VERSION" \
   -n kube-system \
   -f "$SCRIPT_DIR/k8s/addons/aws-load-balancer-controller/values.yaml" \
@@ -53,14 +57,23 @@ echo "✅ AWS Load Balancer Controller installed (version $CONTROLLER_VERSION)"
 # 3. Install Traefik
 echo ""
 echo "🚀 Installing Traefik Ingress Controller..."
-helm install traefik traefik/traefik \
+helm upgrade --install traefik traefik/traefik \
+  --version 41.6.0 \
   -n kube-system \
   -f "$SCRIPT_DIR/k8s/addons/traefik/values.yaml" \
   --wait --timeout=5m
 
 echo "✅ Traefik installed"
 
-# 4. Get Traefik's external URL
+# 4. Install the application that Traefik routes to.
+echo ""
+echo "🎮 Installing GameHub application..."
+helm upgrade --install gamehub "$SCRIPT_DIR/k8s/gamehub" \
+  -n default \
+  --wait --timeout=5m
+echo "✅ GameHub installed"
+
+# 5. Get Traefik's external URL
 echo ""
 echo "=========================================="
 echo "✅ All Helm releases installed successfully!"
@@ -88,4 +101,6 @@ done
 
 echo ""
 echo "Done! The app should be accessible via the Traefik NLB."
+echo "Dashboard: kubectl port-forward -n kube-system deployment/traefik 8080:8080"
+echo "Then open: http://localhost:8080/dashboard/"
 echo ""

@@ -1,6 +1,7 @@
 # Helm Installation Guide
 
-This guide explains how to install the required Helm releases (AWS Load Balancer Controller and Traefik) on your EKS cluster.
+This guide explains how to install the AWS Load Balancer Controller, Traefik,
+and GameHub Helm releases on your EKS cluster.
 
 ## Prerequisites
 
@@ -28,7 +29,8 @@ This script will:
 2. ✅ Create IAM role for AWS Load Balancer Controller (with IRSA)
 3. ✅ Install AWS Load Balancer Controller
 4. ✅ Install Traefik Ingress Controller
-5. ✅ Output the Traefik NLB hostname
+5. ✅ Install GameHub and its Ingress
+6. ✅ Output the Traefik NLB hostname
 
 ## What Gets Installed
 
@@ -88,6 +90,10 @@ helm install aws-load-balancer-controller eks/aws-load-balancer-controller \
 helm install traefik traefik/traefik \
   -n kube-system \
   -f k8s/addons/traefik/values.yaml
+
+# 6. Install GameHub (from the project root)
+helm upgrade --install gamehub ./infra/k8s/gamehub \
+  -n default --wait
 ```
 
 ## Troubleshooting

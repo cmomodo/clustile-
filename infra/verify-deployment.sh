@@ -110,5 +110,6 @@ echo "   • View app logs:       kubectl logs -n $NAMESPACE -l app=$APP_NAME -f
 echo "   • Port-forward test:   kubectl port-forward -n $NAMESPACE svc/$APP_NAME 3000:80"
 echo "   • Check ingress:       kubectl get ingress -n $NAMESPACE"
 echo "   • Check Traefik LB:    kubectl get svc -n kube-system traefik"
-echo "   • Traefik dashboard:   kubectl port-forward -n kube-system svc/traefik 9000:9000"
+echo "   • Traefik dashboard:   kubectl port-forward -n kube-system deployment/traefik 8080:8080"
+echo "   • Dashboard URL:       http://localhost:8080/dashboard/"
 echo ""

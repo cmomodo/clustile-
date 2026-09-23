@@ -49,8 +49,8 @@ helm repo add traefik https://traefik.github.io/charts
 helm repo update traefik
 
 helm template traefik traefik/traefik \
-  --version 41.5.0 \
-  --namespace traefik \
+  --version 41.6.0 \
+  --namespace kube-system \
   --values infra/k8s/addons/traefik/values.yaml
 ```
 
@@ -59,8 +59,8 @@ installed, install Traefik with:
 
 ```bash
 helm upgrade --install traefik traefik/traefik \
-  --version 41.5.0 \
-  --namespace traefik \
+  --version 41.6.0 \
+  --namespace kube-system \
   --create-namespace \
   --values infra/k8s/addons/traefik/values.yaml \
   --set-string "service.annotations.service\.beta\.kubernetes\.io/aws-load-balancer-security-groups=$(terraform -chdir=infra output -raw nlb_security_group_id)" \
@@ -72,6 +72,19 @@ The two dynamic overrides connect the Terraform-managed
 `aws_security_group.lb_sg` and `aws_s3_bucket.lb_logs` resources to the NLB
 created by the controller. The three `aws_subnet.public` instances are selected
 automatically through their `kubernetes.io/role/elb = 1` tags.
+
+### Open the Traefik dashboard
+
+The dashboard route is enabled only on Traefik's internal port 8080. The public
+NLB exposes ports 80 and 443, so its hostname does not serve the dashboard.
+Run this from a machine with Kubernetes access:
+
+```bash
+kubectl port-forward -n kube-system deployment/traefik 8080:8080
+```
+
+Open <http://localhost:8080/dashboard/> (including the trailing slash). The
+port-forward must stay running while using the dashboard.
 
 ### Why keep NLB access logs in S3?
 

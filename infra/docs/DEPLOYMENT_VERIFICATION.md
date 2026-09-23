@@ -4,9 +4,10 @@ After deploying your gamehub app, use these commands to verify it's running.
 
 ## Deploy the app and port-forward
 
-Run these commands from the project root (`kube_game`). Creating EKS and running
-`infra/install-helm.sh` installs the infrastructure controllers, but does not
-install the GameHub application chart.
+Run these commands from the project root (`kube_game`). The current
+`infra/install-helm.sh` installs the controllers and the GameHub application
+chart. If the cluster was set up before that script included the application,
+use the install command below to restore it.
 
 If `kubectl get svc -A` only shows `kubernetes` in the `default` namespace and
 controller services in `kube-system`, the GameHub service is missing. The
@@ -140,7 +141,7 @@ Your Container (port 3000)
 | Pods crashing | `kubectl logs <pod-name>` | Check app startup errors |
 | No Ingress IP | `kubectl describe ingress gamehub` | Wait 2-3 min, may be provisioning NLB |
 | Connection refused | `kubectl port-forward svc/gamehub 3000:80` | Test port-forward first, then debug ingress |
-| HTTP 404 | Check container logs | App may not be handling `/` route |
+| HTTP 404 from Traefik | `kubectl get ingress,svc,pods -n default` | Install the GameHub chart if its Ingress or Service is missing; otherwise check the Ingress class and path |
 
 ## Cleanup after testing
 

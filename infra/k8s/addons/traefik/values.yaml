@@ -11,6 +11,14 @@ providers:
   kubernetesIngress:
     enabled: true
 
+# Keep the dashboard on Traefik's internal 8080 entrypoint. Access it with
+# kubectl port-forward; never publish this port through the public NLB.
+ingressRoute:
+  dashboard:
+    enabled: true
+    entryPoints:
+      - traefik
+
 service:
   spec:
     type: LoadBalancer
